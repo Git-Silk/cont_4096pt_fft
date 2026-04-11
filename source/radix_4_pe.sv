@@ -1,27 +1,3 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 25.02.2026 15:44:39
-// Design Name: 
-// Module Name: radix_4_pe
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
-`timescale 1ns / 1ps
-
 module radix_4_pe #(
     parameter IN_WIDTH  = 16,
     parameter INT_WIDTH = 18  
@@ -33,53 +9,36 @@ module radix_4_pe #(
     output logic signed [IN_WIDTH-1:0] X_im [4]
 );
 
-    logic signed [INT_WIDTH-1:0] A_re, A_im;
-    logic signed [INT_WIDTH-1:0] B_re, B_im;
-    logic signed [INT_WIDTH-1:0] C_re, C_im;
-    logic signed [INT_WIDTH-1:0] D_re, D_im;
-
-    logic signed [INT_WIDTH-1:0] X0_re_int, X0_im_int;
-    logic signed [INT_WIDTH-1:0] X1_re_int, X1_im_int;
-    logic signed [INT_WIDTH-1:0] X2_re_int, X2_im_int;
-    logic signed [INT_WIDTH-1:0] X3_re_int, X3_im_int;
+    logic signed [INT_WIDTH-1:0] a_re, a_im;
+    logic signed [INT_WIDTH-1:0] b_re, b_im;
+    logic signed [INT_WIDTH-1:0] c_re, c_im;
+    logic signed [INT_WIDTH-1:0] d_re, d_im;
 
     always_comb begin
 
-        A_re = x_re[0] + x_re[2];
-        A_im = x_im[0] + x_im[2];
+        a_re = x_re[0] + x_re[2];
+        a_im = x_im[0] + x_im[2];
 
-        B_re = x_re[1] + x_re[3];
-        B_im = x_im[1] + x_im[3];
+        b_re = x_re[1] + x_re[3];
+        b_im = x_im[1] + x_im[3];
 
-        C_re = x_re[0] - x_re[2];
-        C_im = x_im[0] - x_im[2];
+        c_re = x_re[0] - x_re[2];
+        c_im = x_im[0] - x_im[2];
 
-        D_re = x_re[1] - x_re[3];
-        D_im = x_im[1] - x_im[3];
+        d_re = x_re[1] - x_re[3];
+        d_im = x_im[1] - x_im[3];
 
-        X0_re_int = A_re + B_re;
-        X0_im_int = A_im + B_im;
+        X_re[0] = (a_re + b_re) >>> 2;
+        X_im[0] = (a_im + b_im) >>> 2;
 
-        X2_re_int = A_re - B_re;
-        X2_im_int = A_im - B_im;
+        X_re[2] = (a_re - b_re) >>> 2;
+        X_im[2] = (a_im - b_im) >>> 2;
 
-        X1_re_int = C_re + D_im;
-        X1_im_int = C_im - D_re;
+        X_re[1] = (c_re + d_im) >>> 2;
+        X_im[1] = (c_im - d_re) >>> 2;
 
-        X3_re_int = C_re - D_im;
-        X3_im_int = C_im + D_re;
-
-        X_re[0] = X0_re_int[IN_WIDTH-1:0];
-        X_im[0] = X0_im_int[IN_WIDTH-1:0];
-
-        X_re[1] = X1_re_int[IN_WIDTH-1:0];
-        X_im[1] = X1_im_int[IN_WIDTH-1:0];
-
-        X_re[2] = X2_re_int[IN_WIDTH-1:0];
-        X_im[2] = X2_im_int[IN_WIDTH-1:0];
-
-        X_re[3] = X3_re_int[IN_WIDTH-1:0];
-        X_im[3] = X3_im_int[IN_WIDTH-1:0];
+        X_re[3] = (c_re - d_im) >>> 2;
+        X_im[3] = (c_im + d_re) >>> 2;
 
     end
 

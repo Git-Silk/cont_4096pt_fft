@@ -6,10 +6,10 @@ module bs16_complex_tb;
     logic clk;
 
     // Inputs
-    logic signed [19:0] x [0:15][0:1];
+    logic signed [15:0] x [0:15][0:1];
 
     // Outputs
-    logic signed [19:0] X [0:15][0:1];
+    logic signed [15:0] X [0:15][0:1];
 
     // Instantiate DUT
     bs16_complex dut (

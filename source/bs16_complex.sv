@@ -1,64 +1,51 @@
-module BS2_complex(
-    input logic signed [19:0] x[0:1][0:1],
-    output logic signed [19:0] X[0:1][0:1]);
-assign X[0][0]=x[0][0]+x[1][0];
-assign X[0][1]=x[0][1]+x[1][1];
-
-assign X[1][0]=x[0][0]-x[1][0];
-assign X[1][1]=x[0][1]-x[1][1];
-endmodule
-
 module bs4_complex (
-    input logic signed [19:0] x[0:3][0:1],
-    output logic signed [19:0] X[0:3][0:1]);
-logic signed [19:0] x_even[0:1][0:1];
-logic signed [19:0] x_odd[0:1][0:1];
+    input  logic signed [15:0] x [0:3][0:1],
+    output logic signed [15:0] X [0:3][0:1]
+);
 
-logic signed [19:0] X_even[0:1][0:1];
-logic signed [19:0] X_odd[0:1][0:1];
+    logic signed [17:0] a_re, a_im;
+    logic signed [17:0] b_re, b_im;
+    logic signed [17:0] c_re, c_im;
+    logic signed [17:0] d_re, d_im;
 
-assign x_even[0][0]=x[0][0];
-assign x_even[0][1]=x[0][1];
+    always_comb begin
+        a_re = x[0][0] + x[2][0];
+        a_im = x[0][1] + x[2][1];    
+        b_re = x[1][0] + x[3][0];
+        b_im = x[1][1] + x[3][1];
+        c_re = x[0][0] - x[2][0];
+        c_im = x[0][1] - x[2][1];
+        d_re = x[1][0] - x[3][0];
+        d_im = x[1][1] - x[3][1];
 
-assign x_even[1][0]=x[2][0];
-assign x_even[1][1]=x[2][1];
+        X[0][0] = (a_re + b_re) >>> 2;
+        X[0][1] = (a_im + b_im) >>> 2;
+        X[2][0] = (a_re - b_re) >>> 2;
+        X[2][1] = (a_im - b_im) >>> 2;
+        X[1][0] = (c_re + d_im) >>> 2;
+        X[1][1] = (c_im - d_re) >>> 2;
+        X[3][0] = (c_re - d_im) >>> 2;
+        X[3][1] = (c_im + d_re) >>> 2;
 
-assign x_odd[0][0]=x[1][0];
-assign x_odd[0][1]=x[1][1];
-
-assign x_odd[1][0]=x[3][0];
-assign x_odd[1][1]=x[3][1];
-
-BS2_complex bs2_1(.x(x_even),.X(X_even));
-BS2_complex bs2_2(.x(x_odd),.X(X_odd));
-/////////////////////////////////////////////////
-
-always_comb begin
-    X[0][0] = X_even[0][0]+X_odd[0][0];
-    X[0][1] = X_even[0][1]+X_odd[0][1];
-    X[1][0] = X_even[1][0]+X_odd[1][1];
-    X[1][1] = X_even[1][1]-X_odd[1][0];
-    X[2][0] = X_even[0][0]-X_odd[0][0];
-    X[2][1] = X_even[0][1]-X_odd[0][1];
-    X[3][0] = X_even[1][0]-X_odd[1][1];
-    X[3][1] = X_even[1][1]+X_odd[1][0];
-end
+    end
 endmodule
+
+
 module csd_multiplier(
-    input signed [19:0] xi[0:1],input signed [15:0] tw[0:1],output signed [19:0]y[0:1]);
+    input signed [15:0] xi[0:1],input signed [15:0] tw[0:1],output signed [15:0]y[0:1]);
     
-    logic signed [34:0] real_part; 
-    logic signed [34:0] img_part;
+    logic signed [30:0] real_part; 
+    logic signed [30:0] img_part;
     assign real_part = xi[0]*tw[0]-xi[1]*tw[1]; 
     assign img_part = xi[0]*tw[1]+xi[1]*tw[0];
     
-    assign y[0] = real_part[34:15];
-    assign y[1] = img_part[34:15];
+    assign y[0] = real_part[30:15];
+    assign y[1] = img_part[30:15];
 
 endmodule
 
 module bs16_complex(
-    input logic signed [19:0] x[0:15][0:1],input logic clk,output logic signed [19:0] X[0:15][0:1]);
+    input logic signed [15:0] x[0:15][0:1],input logic clk,output logic signed [15:0] X[0:15][0:1]);
 
 parameter signed [15:0] W160[0:1]={16'b0111_1111_1111_1111,16'b0000_0000_0000_0000};
 parameter signed [15:0] W161[0:1]={16'b0111_0110_0100_0010,16'b1100_1111_0000_0100};
@@ -73,13 +60,13 @@ parameter signed [15:0] W166[0:1] ={16'b1010_0101_0111_1110,16'b1010_0101_0111_1
 
 parameter signed [15:0] W169 [0:1]={16'b1000_1001_1011_1110,16'b0011_0000_1111_1100};
 
-logic signed [19:0] x_stage1[0:3][0:3][0:1];
+logic signed [15:0] x_stage1[0:3][0:3][0:1];
 
-logic signed [19:0] X_stage1[0:3][0:3][0:1],X_stage1_reg[0:3][0:3][0:1];
+logic signed [15:0] X_stage1[0:3][0:3][0:1],X_stage1_reg[0:3][0:3][0:1];
 
-logic signed [19:0] X_stage2[0:3][0:3][0:1],X_stage2_reg[0:3][0:3][0:1];
+logic signed [15:0] X_stage2[0:3][0:3][0:1],X_stage2_reg[0:3][0:3][0:1];
 
-logic signed [19:0] x_stage2[0:3][0:3][0:1];
+logic signed [15:0] x_stage2[0:3][0:3][0:1];
 
 always_comb begin
     for(int i=0;i<4;i++) begin
@@ -113,10 +100,10 @@ always_ff @(posedge clk) begin
     end
 end
 
-logic signed [19:0] x_stage2_1proper [0:3][0:1];
-logic signed [19:0] x_stage2_2proper [0:3][0:1];
-logic signed [19:0] x_stage2_3proper [0:3][0:1];
-logic signed [19:0] x_stage2_4proper [0:3][0:1];
+logic signed [15:0] x_stage2_1proper [0:3][0:1];
+logic signed [15:0] x_stage2_2proper [0:3][0:1];
+logic signed [15:0] x_stage2_3proper [0:3][0:1];
+logic signed [15:0] x_stage2_4proper [0:3][0:1];
 
 always_comb begin
 
