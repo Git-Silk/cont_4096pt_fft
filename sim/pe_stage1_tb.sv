@@ -9,11 +9,11 @@ module pe_stage1_tb;
     logic signed [15:0] X_stage1 [0:15][0:1];
 
     // Instantiate DUT
-    pe_stage1 dut (
+    pe_stage2 dut (
         .clk(clk),
         .rst(rst),
-        .x_stage1(x_stage1),
-        .X_stage1(X_stage1)
+        .x_stage2(x_stage1),
+        .X_stage2(X_stage1)
     );
 
     // Clock generation
