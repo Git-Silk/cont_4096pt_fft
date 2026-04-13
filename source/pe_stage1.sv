@@ -52,14 +52,14 @@ module pe_stage1(
 
         end else if (theta_temp[k] >= -17'sd32768) begin
             // -1 ? -0.5
-            x_cordic_in[k][0] = -bs_out[k+1][1];
-            x_cordic_in[k][1] =  bs_out[k+1][0];
+            x_cordic_in[k][0] =  bs_out[k+1][1];
+            x_cordic_in[k][1] = -bs_out[k+1][0];
             theta[k] = theta_temp[k] + 17'sd16384;
 
         end else if (theta_temp[k] >= -17'sd49152) begin
             // -1.5 ? -1
-            x_cordic_in[k][0] =  bs_out[k+1][1];
-            x_cordic_in[k][1] = -bs_out[k+1][0];
+            x_cordic_in[k][0] = -bs_out[k+1][1];
+            x_cordic_in[k][1] =  bs_out[k+1][0];
             theta[k] = theta_temp[k] + 17'sd49152;
 
         end else begin

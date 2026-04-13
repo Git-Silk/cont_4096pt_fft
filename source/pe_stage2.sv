@@ -17,6 +17,7 @@ module pe_stage2(
     assign X_stage2[0][1] = bs_out[0][1];
     
     logic unsigned [20:0] theta_temp [0:14];
+    logic unsigned [16:0] theta_scaled [0:14];
     logic signed [15:0] theta [0:14];
     logic signed [15:0] x_cordic_in [0:14][0:1];
     
@@ -37,37 +38,36 @@ module pe_stage2(
     always_comb begin   
         for (int k = 0; k < 15; k++) begin
            theta_temp[k] = n * (k+1) * 256;
+           theta_scaled[k] = -{1'b0,theta_temp[k][15:0]};
         end
-    end
-
-     
+    end  
      
      always_comb begin
     for (int k = 0; k < 15; k++) begin
 
-        if (-{1'b0,theta_temp[k][15:0]} >= -17'sd16384) begin
+        if (theta_scaled[k] >= -17'sd16384) begin
             // -0.5 ? 0
             x_cordic_in[k][0] = bs_out[k+1][0];
             x_cordic_in[k][1] = bs_out[k+1][1];
-            theta[k] = -{1'b0,theta_temp[k][15:0]};
+            theta[k] = theta_scaled[k];
 
-        end else if (-{1'b0,theta_temp[k][15:0]} >= -17'sd32768) begin
+        end else if (theta_scaled[k] >= -17'sd32768) begin
             // -1 ? -0.5
-            x_cordic_in[k][0] = -bs_out[k+1][1];
-            x_cordic_in[k][1] =  bs_out[k+1][0];
-            theta[k] = -{1'b0,theta_temp[k][15:0]} + 17'sd16384;
-
-        end else if (-{1'b0,theta_temp[k][15:0]} >= -17'sd49152) begin
-            // -1.5 ? -1
             x_cordic_in[k][0] =  bs_out[k+1][1];
             x_cordic_in[k][1] = -bs_out[k+1][0];
-            theta[k] = -{1'b0,theta_temp[k][15:0]} + 17'sd49152;
+            theta[k] = theta_scaled[k] + 17'sd16384;
+
+        end else if (theta_scaled[k] >= -17'sd49152) begin
+            // -1.5 ? -1
+            x_cordic_in[k][0] = -bs_out[k+1][1];
+            x_cordic_in[k][1] =  bs_out[k+1][0];
+            theta[k] = theta_scaled[k] + 17'sd49152;
 
         end else begin
             // -2 ? -1.5
             x_cordic_in[k][0] = bs_out[k+1][0];
             x_cordic_in[k][1] = bs_out[k+1][1];
-            theta[k] = -{1'b0,theta_temp[k][15:0]} + 18'sd65536;
+            theta[k] = theta_scaled[k] + 18'sd65536;
 
         end
 
