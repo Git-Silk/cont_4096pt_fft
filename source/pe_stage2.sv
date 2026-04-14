@@ -13,8 +13,28 @@ module pe_stage2(
         .X(bs_out)
     );
     
-    assign X_stage2[0][0] = bs_out[0][0];
-    assign X_stage2[0][1] = bs_out[0][1];
+    logic signed [15:0] x0_pipe_real [0:9];
+    logic signed [15:0] x0_pipe_imag [0:9];
+    
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            for (int i = 0; i < 10; i++) begin
+                x0_pipe_real[i] <= 0;
+                x0_pipe_imag[i] <= 0;
+            end
+        end else begin
+            x0_pipe_real[0] <= bs_out[0][0];
+            x0_pipe_imag[0] <= bs_out[0][1];
+    
+            for (int i = 1; i < 10; i++) begin
+                x0_pipe_real[i] <= x0_pipe_real[i-1];
+                x0_pipe_imag[i] <= x0_pipe_imag[i-1];
+            end
+        end
+    end
+    
+    assign X_stage2[0][0] = x0_pipe_real[9];
+    assign X_stage2[0][1] = x0_pipe_imag[9];
     
     logic unsigned [20:0] theta_temp [0:14];
     logic unsigned [16:0] theta_scaled [0:14];
