@@ -2,10 +2,24 @@ module pe_stage1(
     input logic clk,
     input logic rst,
     input  logic signed [15:0] x_stage1 [0:15][0:1], 
-    output logic signed [15:0] X_stage1 [0:15][0:1] 
+    output logic signed [15:0] X_stage1 [0:15][0:1] ,
+     input logic ms1_out_valid
 );
 
     logic signed [15:0] bs_out [0:15][0:1];
+
+    logic ms1_out_valid_reg[0:1];
+    always@(posedge clk)begin
+        if(rst) begin
+            ms1_out_valid_reg[0] <= 0;
+            ms1_out_valid_reg[1] <= 0;
+        end
+        else begin
+            ms1_out_valid_reg[0] <= ms1_out_valid;
+            ms1_out_valid_reg[1] <= ms1_out_valid_reg[0];
+        end
+        
+    end
 
     bs16_complex bs_inst (
         .clk(clk),
@@ -47,7 +61,8 @@ module pe_stage1(
     always_ff @(posedge clk) begin
         if (rst) begin
             n_counter <= 8'd0;
-        end else begin
+        end 
+        else if(ms1_out_valid_reg[1]) begin
             n_counter <= n_counter + 1;
         end
     end
