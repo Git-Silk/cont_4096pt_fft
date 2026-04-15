@@ -50,22 +50,24 @@ module pe_stage2(
     assign X_stage2[0][0] = x0_pipe_real[9];
     assign X_stage2[0][1] = x0_pipe_imag[9];
     
-    logic unsigned [16:0] theta_temp [0:14];
+    logic unsigned [20:0] theta_temp [0:14];
+    logic unsigned [16:0] theta_scaled [0:14];
     logic signed [15:0] theta [0:14];
     logic signed [15:0] x_cordic_in [0:14][0:1];
     
     logic [3:0] n;
     logic [3:0] cycle_cnt;
-
+    
     always_ff @(posedge clk) begin
         if (rst) begin
             n <= 4'd0;
             cycle_cnt <= 4'd0;
         end 
         else if (ms2_out_valid_reg[1]) begin
+    
             if (cycle_cnt == 4'd15) begin
                 cycle_cnt <= 4'd0;
-                n <= n + 1;   
+                n <= n + 1; 
             end 
             else begin
                 cycle_cnt <= cycle_cnt + 1;
@@ -73,38 +75,39 @@ module pe_stage2(
         end
     end
     
-    always_comb begin
+    always_comb begin   
         for (int k = 0; k < 15; k++) begin
-           theta_temp[k] = - (n * (k+1) * 16);
+           theta_temp[k] = n * (k+1) * 256;
+           theta_scaled[k] = -{1'b0,theta_temp[k][15:0]};
         end
     end  
      
      always_comb begin
     for (int k = 0; k < 15; k++) begin
 
-        if (theta_temp[k] >= -17'sd16384) begin
+        if (theta_scaled[k] >= -17'sd16384) begin
             // -0.5 ? 0
             x_cordic_in[k][0] = bs_out[k+1][0];
             x_cordic_in[k][1] = bs_out[k+1][1];
-            theta[k] = theta_temp[k];
+            theta[k] = theta_scaled[k];
 
-        end else if (theta_temp[k] >= -17'sd32768) begin
+        end else if (theta_scaled[k] >= -17'sd32768) begin
             // -1 ? -0.5
             x_cordic_in[k][0] =  bs_out[k+1][1];
             x_cordic_in[k][1] = -bs_out[k+1][0];
-            theta[k] = theta_temp[k] + 17'sd16384;
+            theta[k] = theta_scaled[k] + 17'sd16384;
 
-        end else if (theta_temp[k] >= -17'sd49152) begin
+        end else if (theta_scaled[k] >= -17'sd49152) begin
             // -1.5 ? -1
             x_cordic_in[k][0] = -bs_out[k+1][1];
             x_cordic_in[k][1] =  bs_out[k+1][0];
-            theta[k] = theta_temp[k] + 17'sd49152;
+            theta[k] = theta_scaled[k] + 17'sd49152;
 
         end else begin
             // -2 ? -1.5
             x_cordic_in[k][0] = bs_out[k+1][0];
             x_cordic_in[k][1] = bs_out[k+1][1];
-            theta[k] = theta_temp[k] + 18'sd65536;
+            theta[k] = theta_scaled[k] + 18'sd65536;
 
         end
 
